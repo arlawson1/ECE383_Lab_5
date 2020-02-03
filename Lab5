@@ -1,0 +1,163 @@
+Task 1 -- task1.c: 
+#include "pic24_all.h"
+uint16 u16_a, u16_b, u16_c, u16_d;
+uint8 u8_x, u8_y, u8_z;
+void main(void) {
+ u8_x=0xFE;
+ u8_y=0x02;
+ u16_a = 0xFFFE;
+ u16_b = 0x0002;
+
+ u8_z=u8_x+u8_y;
+ u16_d=(uint16) u8_x + (uint16) u8_y;
+ u16_c=u16_a+u16_b;
+}
+
+Task 2 -- task2.c:
+#include <stdio.h>
+#include "pic24_all.h"
+
+uint16 check_val;
+uint8 ones_count, first_one, shift_count;
+
+int main(){
+
+check_val = 0xF508;
+
+	
+	while(check_val){
+		ones_count += check_val & 1;
+		if(first_one == 0 && ones_count == 1){
+			first_one = shift_count;
+		}
+		check_val >>=1;
+		shift_count++;
+	}
+
+
+return 0;
+
+}
+
+
+
+Task 3 -- task3.s:
+task3.s:
+
+	.include "p24Hxxxx.inc"
+	.global __reset
+
+	.bss
+check_val: .space 2
+ones_count: .space 1
+first_one: .space 1
+shift_count: .space 1
+
+
+
+	.text
+__reset:
+	mov #__SP_init, W15
+	mov #__SPLIM_init,W0
+	mov W0,SPLIM
+
+;---------------------
+;USER CODE STARTS HERE
+;---------------------
+;#include <stdio.lib>
+;#include "pic24_all.h"
+;
+;uint16 check_val;
+;uint8 ones_count, first_one, shift_count;
+;
+;int main(){
+;
+;check_val = 0xF508;
+;
+;while(check_val){
+;	ones_count+=check_val&1;
+;	if(first_one==0&&ones_count==1){
+;		first_one=shift_count;
+;	}
+;	check_val >>=1;
+;	shift_count++;
+;}
+;return 0;
+;}
+
+mov #0xF508, W0
+mov WREG, check_val
+mov.b #0, W0
+mov.b WREG, ones_count
+mov.b #0, w0
+mov.b WREG, first_one
+mov.b #0, W0
+mov.b WREG, shift_count
+	mov check_val, W0			;move check_val --
+	mov W0, W1					;into W1
+
+top_while:
+	cp W1, #0
+	bra Z, end_while			;if check_val == 0x0000, end_while
+	bra while_body				;else, while_body
+
+while_body:
+	lsr W1, W1					;shift check_val right 1
+	inc shift_count				;keep track of how many bits we have shifted
+	and W1, #1, W0				;LSB of check_val & 1
+	cp0 W0
+	bra Z, top_while			;if 0, move to top of loop
+	inc ones_count				;else, inc ones_count
+	mov ones_count, W2
+	cp W2, #1
+	bra Z, first_one_check
+	bra top_while				;unavoidable branch to top_while
+
+first_one_check:
+	mov shift_count, W0
+	mov.b WREG, first_one
+	bra top_while
+	
+end_while:
+	goto done
+
+done:
+	.end
+
+
+
+
+
+
+
+
+
+
+
+Task 4 -- task4.c: 
+#include <stdio.h>
+#include "pic24_all.h"
+
+	uint16 u16_x;
+	uint16 u16_y;
+	uint8 u8_count;
+
+int main(){
+
+	u16_x = 0x01;
+	u16_y = 0x03;
+	u8_count = 0x03;
+
+	while(u8_count != 0){
+		if(u16_x == u16_y){
+			u16_y++;
+		}
+		if(u16_x < u16_y){
+			u16_x = u16_x + 2;
+		}
+		u8_count--;
+	}
+
+
+return 0;
+}
